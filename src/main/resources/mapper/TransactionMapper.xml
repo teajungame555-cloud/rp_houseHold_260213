@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.budget.dao.TransactionDao">
+
+    <!-- ══════════════════════════════════════════════
+         ResultMap
+         DB  컬럼(snake_case) → Java 필드(camelCase)
+         tx_date DATE → java.util.Date (JSTL 호환)
+    ══════════════════════════════════════════════ -->
+    <resultMap id="txRM" type="Transaction">
+        <id     property="txId"         column="tx_id"/>
+        <result property="categoryId"   column="category_id"/>
+        <result property="title"        column="title"/>
+        <result property="amount"       column="amount"      javaType="java.lang.Long"/>
+        <result property="txType"       column="tx_type"/>
+        <!-- DATE → java.util.Date : jdbcType="DATE" 명시 -->
+        <result property="txDate"       column="tx_date"     javaType="java.util.Date" jdbcType="DATE"/>
+        <result property="memo"         column="memo"/>
+        <result property="createdAt"    column="created_at"  javaType="java.util.Date" jdbcType="TIMESTAMP"/>
+        <result property="updatedAt"    column="updated_at"  javaType="java.util.Date" jdbcType="TIMESTAMP"/>
+        <!-- JOIN 필드 -->
+        <result property="categoryName" column="category_name"/>
+        <result property="icon"         column="icon"/>
+        <result property="color"        column="color"/>
+    </resultMap>
+
+    <!-- ══ 공통 SELECT 절 ══════════════════════════ -->
+    <sql id="selectBase">
+        SELECT t.tx_id,
+               t.category_id,
+               t.title,
+               t.amount,
+               t.tx_type,
+               t.tx_date,
+               t.memo,
+               t.created_at,
+               t.updated_at,
+               c.category_name,
+               c.icon,
+               c.color
+          FROM transaction_history t
+          JOIN category c ON t.category_id = c.category_id
+    </sql>
+
+    <!-- ══ 공통 WHERE 절 (동적 쿼리) ══════════════ -->
+    <sql id="searchWhere">
+        <where>
+            <if test="year != null">
+                AND YEAR(t.tx_date) = #{year}
+            </if>
+            <if test="month != null">
+                AND MONTH(t.tx_date) = #{month}
+            </if>
+            <if test="txType != null and txType != ''">
+                AND t.tx_type = #{txType}
+            </if>
+            <if test="categoryId != null">
+                AND t.category_id = #{categoryId}
+            </if>
+            <if test="keyword != null and keyword != ''">
+                AND (t.title LIKE CONCAT('%', #{keyword}, '%')
+                  OR t.memo  LIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+        </where>
+    </sql>
+
+    <!-- ══ 목록 조회 ════════════════════════════════ -->
+    <select id="selectList" parameterType="SearchCondition" resultMap="txRM">
+        <include refid="selectBase"/>
+        <include refid="searchWhere"/>
+        ORDER BY t.tx_date DESC, t.tx_id DESC
+        LIMIT #{size} OFFSET #{offset}
+    </select>
+
+    <!-- ══ 전체 건수 ═════════════════════════════════ -->
+    <select id="countList" parameterType="SearchCondition" resultType="int">
+        SELECT COUNT(*)
+          FROM transaction_history t
+          JOIN category c ON t.category_id = c.category_id
+        <include refid="searchWhere"/>
+    </select>
+
+    <!-- ══ 단건 조회 ═════════════════════════════════ -->
+    <select id="selectOne" parameterType="int" resultMap="txRM">
+        <include refid="selectBase"/>
+        WHERE t.tx_id = #{txId}
+    </select>
+
+    <!-- ══ 월별 요약 ═════════════════════════════════ -->
+    <select id="selectMonthlySummary" resultType="MonthlySummary">
+        SELECT #{year}  AS year,
+               #{month} AS month,
+               IFNULL(SUM(CASE WHEN tx_type = 'I' THEN amount ELSE 0 END), 0) AS totalIncome,
+               IFNULL(SUM(CASE WHEN tx_type = 'E' THEN amount ELSE 0 END), 0) AS totalExpense
+          FROM transaction_history
+         WHERE YEAR(tx_date)  = #{year}
+           AND MONTH(tx_date) = #{month}
+    </select>
+
+    <!-- ══ 카테고리별 지출 집계 ══════════════════════ -->
+    <select id="selectExpenseByCategory" resultType="map">
+        SELECT c.category_name  AS categoryName,
+               c.color          AS color,
+               c.icon           AS icon,
+               SUM(t.amount)    AS total
+          FROM transaction_history t
+          JOIN category c ON t.category_id = c.category_id
+         WHERE t.tx_type = 'E'
+           AND YEAR(t.tx_date)  = #{year}
+           AND MONTH(t.tx_date) = #{month}
+         GROUP BY c.category_id, c.category_name, c.color, c.icon
+         ORDER BY total DESC
+    </select>
+
+    <!-- ══ 최근 6개월 추이 ═══════════════════════════ -->
+    <select id="selectMonthlyTrend" resultType="map">
+        SELECT DATE_FORMAT(tx_date, '%Y-%m') AS ym,
+               IFNULL(SUM(CASE WHEN tx_type = 'I' THEN amount ELSE 0 END), 0) AS income,
+               IFNULL(SUM(CASE WHEN tx_type = 'E' THEN amount ELSE 0 END), 0) AS expense
+          FROM transaction_history
+         WHERE tx_date >= DATE_SUB(CURDATE(), INTERVAL 5 MONTH)
+         GROUP BY DATE_FORMAT(tx_date, '%Y-%m')
+         ORDER BY ym ASC
+    </select>
+
+    <!-- ══ 등록 ════════════════════════════════════ -->
+    <insert id="insert" parameterType="Transaction"
+            useGeneratedKeys="true" keyProperty="txId">
+        INSERT INTO transaction_history
+               (category_id, title, amount, tx_type, tx_date, memo)
+        VALUES (#{categoryId}, #{title}, #{amount}, #{txType},
+                #{txDate, jdbcType=DATE}, #{memo})
+    </insert>
+
+    <!-- ══ 수정 ════════════════════════════════════ -->
+    <update id="update" parameterType="Transaction">
+        UPDATE transaction_history
+           SET category_id = #{categoryId},
+               title       = #{title},
+               amount      = #{amount},
+               tx_type     = #{txType},
+               tx_date     = #{txDate, jdbcType=DATE},
+               memo        = #{memo}
+         WHERE tx_id = #{txId}
+    </update>
+
+    <!-- ══ 삭제 ════════════════════════════════════ -->
+    <delete id="delete" parameterType="int">
+        DELETE FROM transaction_history WHERE tx_id = #{txId}
+    </delete>
+
+</mapper>

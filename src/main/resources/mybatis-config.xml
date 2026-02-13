@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+    <settings>
+        <!-- DB 컬럼명(snake_case) → Java 필드(camelCase) 자동 매핑 -->
+        <setting name="mapUnderscoreToCamelCase" value="true"/>
+        <!-- NULL 처리 -->
+        <setting name="jdbcTypeForNull"          value="NULL"/>
+        <!-- 로그 -->
+        <setting name="logImpl"                  value="SLF4J"/>
+    </settings>
+
+    <!--
+        typeHandlers: MyBatis 기본 핸들러가
+        DATE  컬럼 → java.util.Date 로 매핑합니다.
+        java.sql.Date(java.util.Date 의 하위 클래스)이므로
+        fmt:formatDate 와 완전 호환됩니다.
+    -->
+</configuration>
