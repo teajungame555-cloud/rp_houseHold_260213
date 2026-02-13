@@ -22,3 +22,23 @@
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 replay_pid*
+
+# 여기에 추가.
+# Eclipse
+.settings/
+.project
+.classpath
+.metadata/
+bin/
+tmp/
+
+# Maven/Gradle
+target/
+build/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# MySQL/Database config (개인 정보 보호)
+*.properties
