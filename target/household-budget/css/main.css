@@ -1,0 +1,199 @@
+/* ============================================================
+   가계부 - 메인 스타일시트
+   Bootstrap 5 커스텀 + 모바일 반응형
+   ============================================================ */
+
+/* ── CSS 변수 ──────────────────────────────────────────── */
+:root {
+    --c-primary:   #2563eb;
+    --c-success:   #16a34a;
+    --c-danger:    #dc2626;
+    --c-bg:        #f8fafc;
+    --c-card-sh:   0 1px 3px rgba(0,0,0,.08), 0 4px 12px rgba(0,0,0,.05);
+    --nav-h:       58px;
+    --tab-h:       62px;
+}
+
+/* ── 전역 ─────────────────────────────────────────────── */
+body {
+    font-family: 'Noto Sans KR', 'Malgun Gothic', sans-serif;
+    background:  var(--c-bg);
+    color:       #1e293b;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.main-wrap { min-height: calc(100vh - var(--nav-h)); }
+
+/* 모바일 탭바 여백 확보 */
+@media (max-width: 991.98px) {
+    .page-bottom-pad { padding-bottom: calc(var(--tab-h) + 16px); }
+}
+
+/* ── 네비게이션 ───────────────────────────────────────── */
+.nav-custom {
+    background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%) !important;
+    height: var(--nav-h);
+}
+
+.brand-icon {
+    display:         inline-flex;
+    align-items:     center;
+    justify-content: center;
+    width:           34px; height: 34px;
+    background:      rgba(255,255,255,.18);
+    border-radius:   10px;
+    font-size:       1.1rem;
+}
+
+.nav-menu-link {
+    border-radius: 8px;
+    padding: 5px 12px !important;
+    font-size: .9rem;
+    transition: background .15s;
+}
+.nav-menu-link:hover,
+.nav-menu-link.active { background: rgba(255,255,255,.18); }
+
+/* ── 모바일 탭바 ──────────────────────────────────────── */
+.tabbar {
+    height:      var(--tab-h);
+    z-index:     1040;
+    padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+.tabbar-btn {
+    display:         flex;
+    flex-direction:  column;
+    align-items:     center;
+    justify-content: center;
+    height:          var(--tab-h);
+    text-decoration: none;
+    color:           #94a3b8;
+    font-size:       .63rem;
+    font-weight:     600;
+    gap:             3px;
+    transition:      color .15s;
+}
+.tabbar-btn i { font-size: 1.25rem; }
+.tabbar-btn.active { color: var(--c-primary); }
+
+.tabbar-btn--add { color: #94a3b8; }
+.tabbar-add-circle {
+    display:         flex;
+    align-items:     center;
+    justify-content: center;
+    width:  44px; height: 44px;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    border-radius: 14px;
+    margin-top:   -12px;
+    box-shadow:    0 4px 14px rgba(37,99,235,.4);
+}
+.tabbar-add-circle i { font-size: 1.35rem; color: #fff; }
+
+/* ── 카드 공통 ────────────────────────────────────────── */
+.card {
+    border-radius: 16px !important;
+    box-shadow:    var(--c-card-sh) !important;
+}
+.card-header { border-radius: 16px 16px 0 0 !important; }
+
+/* ── 요약 카드 ────────────────────────────────────────── */
+.card-summary { border-radius: 14px !important; transition: transform .2s; }
+.card-summary:active { transform: scale(.97); }
+
+.summary-icon {
+    width:           42px; height: 42px;
+    border-radius:   50%;
+    display:         flex;
+    align-items:     center;
+    justify-content: center;
+    font-size:       1.2rem;
+}
+.summary-icon--in  { background: rgba(22,163,74,.12);  color: #16a34a; }
+.summary-icon--out { background: rgba(220,38,38,.10);  color: #dc2626; }
+.summary-icon--bal { background: rgba(37,99,235,.10);  color: #2563eb; }
+
+.summary-amount { font-size: .9rem; line-height: 1.2; }
+@media (min-width: 480px) { .summary-amount { font-size: 1.05rem; } }
+
+/* ── 차트 ─────────────────────────────────────────────── */
+.chart-wrap { position: relative; height: 200px; }
+@media (min-width: 992px) { .chart-wrap { height: 230px; } }
+
+/* 범례 */
+.legend-wrap { display: flex; flex-wrap: wrap; gap: 6px; }
+.legend-chip {
+    display:     inline-flex;
+    align-items: center;
+    gap:         5px;
+    font-size:   .74rem;
+    background:  #f1f5f9;
+    padding:     3px 9px;
+    border-radius: 20px;
+}
+.legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.legend-val { color: #64748b; }
+
+/* ── 거래 목록 ────────────────────────────────────────── */
+.tx-list .list-group-item:first-child { border-top: none; }
+.tx-list .list-group-item:last-child  { border-bottom: none; }
+.tx-item { transition: background .12s; }
+
+.tx-cat-icon {
+    width:           40px; height: 40px;
+    display:         flex;
+    align-items:     center;
+    justify-content: center;
+    font-size:       1.1rem;
+    flex-shrink:     0;
+}
+
+/* ── 등록/수정 폼 ─────────────────────────────────────── */
+.type-toggle { background: #f1f5f9; }
+
+.type-label {
+    cursor:      pointer;
+    background:  transparent;
+    color:       #64748b;
+    transition:  background .2s, color .2s;
+    user-select: none;
+    font-size:   .95rem;
+}
+.btn-check:checked + .type-label         { background: var(--c-success); color: #fff; }
+.btn-check:checked + .type-label--e      { background: var(--c-danger);  color: #fff; }
+
+/* 금액 입력 */
+.input-group-lg input.form-control {
+    font-size:   1.5rem !important;
+    font-weight: 700 !important;
+    border-left: none;
+}
+.input-group-lg .input-group-text { border-right: none; }
+
+/* 카테고리 칩 */
+.cat-chip {
+    border-radius: 20px !important;
+    font-size:     .82rem;
+    transition:    all .15s;
+}
+
+/* ── 폼 컨트롤 ────────────────────────────────────────── */
+.form-control, .form-select { border-radius: 10px; }
+.form-control:focus, .form-select:focus {
+    border-color: var(--c-primary);
+    box-shadow:   0 0 0 3px rgba(37,99,235,.12);
+}
+
+/* ── 버튼 ─────────────────────────────────────────────── */
+.btn           { border-radius: 10px; }
+.btn-lg        { border-radius: 12px; }
+.btn-sm        { border-radius: 8px;  }
+
+/* ── 알림 ─────────────────────────────────────────────── */
+.alert-flash { border-radius: 12px; font-size: .9rem; }
+
+/* ── 모달 ─────────────────────────────────────────────── */
+.modal-content { border-radius: 20px !important; }
+
+/* ── 유틸 ─────────────────────────────────────────────── */
+.min-w-0 { min-width: 0; }
